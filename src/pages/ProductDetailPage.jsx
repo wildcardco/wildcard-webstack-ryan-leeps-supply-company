@@ -2,12 +2,14 @@ import { useState } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import { availabilityLabel, getCategory, getProduct, priceLabel } from '../data/catalog'
 import { useCart } from '../context/CartContext'
-import { ExternalAnchor, Page } from '../components/Facts'
+import { ExternalAnchor, Page, PageHeader } from '../components/Facts'
 import { AvailabilityBlock, PriceBlock } from '../components/ProductViews'
+import { usePageTitle } from '../hooks/usePageTitle'
 
 export function ProductDetailPage() {
   const { slug } = useParams()
   const product = getProduct(slug)
+  usePageTitle(product ? product.name : 'Page not in this sample | Leeps Supply Company')
   const { addItem } = useCart()
   const [imageIndex, setImageIndex] = useState(0)
   const [quantity, setQuantity] = useState(1)
@@ -16,11 +18,12 @@ export function ProductDetailPage() {
   if (!product) {
     return (
       <Page title="Page not in this sample | Leeps Supply Company">
-        <h1 className="text-2xl font-semibold">Page not in this sample</h1>
-        <p className="mt-3">That product is not one of the three sample pages.</p>
-        <p className="mt-3">
-          <Link to="/products">Browse the sample products</Link>
-        </p>
+        <PageHeader heading="Page not in this sample">
+          <p>That product is not one of the three sample pages.</p>
+          <p>
+            <Link to="/products">Browse the sample products</Link>
+          </p>
+        </PageHeader>
       </Page>
     )
   }
@@ -29,9 +32,9 @@ export function ProductDetailPage() {
   const image = product.images[imageIndex] || product.images[0]
 
   return (
-    <Page title={product.name}>
-      <nav aria-label="Breadcrumb" className="text-sm">
-        <ol className="flex flex-wrap gap-x-2 gap-y-1">
+    <div className="detail">
+      <nav aria-label="Breadcrumb" className="crumbs">
+        <ol>
           <li>
             <Link to="/">Home</Link>
           </li>
@@ -51,50 +54,48 @@ export function ProductDetailPage() {
           <li aria-current="page">{product.partNumber}</li>
         </ol>
       </nav>
-      <div className="mt-4 grid gap-6 md:grid-cols-2">
-        <div>
+      <div className="detail-layout">
+        <div className="detail-media reveal">
           {image ? (
             <img
+              className="detail-hero-img photo-settle"
               src={image.src}
               alt={`${product.name} product image ${imageIndex + 1}`}
               width={image.width}
               height={image.height}
-              className="aspect-square w-full border border-line bg-surface object-contain"
             />
           ) : null}
           {product.images.length > 1 ? (
-            <ul className="mt-3 flex gap-2">
+            <ul className="thumbs">
               {product.images.map((item, index) => (
                 <li key={item.src}>
                   <button
                     type="button"
-                    className="relative h-16 w-16 overflow-hidden border border-line bg-surface"
                     aria-pressed={index === imageIndex}
                     onClick={() => setImageIndex(index)}
                   >
-                    <img src={item.src} alt="" className="h-full w-full object-contain" />
-                    <span className="sr-only">Show image {index + 1} of {product.name}</span>
+                    <img src={item.src} alt="" />
+                    <span className="sr-only">
+                      Show image {index + 1} of {product.name}
+                    </span>
                   </button>
                 </li>
               ))}
             </ul>
           ) : null}
         </div>
-        <div>
-          <h1 className="text-2xl font-semibold" data-testid="product-title">
-            {product.name}
-          </h1>
-          <p className="mt-2">
+        <div className="detail-buy reveal">
+          <h1 data-testid="product-title">{product.name}</h1>
+          <span className="draw-rule rule-red" />
+          <p>
             Brand <Link to={`/brands/${product.brandSlug}`}>{product.brand}</Link>
           </p>
           <p>Part number {product.partNumber}</p>
-          <p className="mt-3">{product.shortDescription}</p>
-          <div className="mt-4">
-            <PriceBlock product={product} />
-            <AvailabilityBlock product={product} />
-          </div>
+          <p>{product.shortDescription}</p>
+          <PriceBlock product={product} />
+          <AvailabilityBlock product={product} />
           <form
-            className="mt-4 flex flex-wrap items-end gap-3"
+            className="buy-row"
             onSubmit={(event) => {
               event.preventDefault()
               const qty = Number.parseInt(quantity, 10)
@@ -103,11 +104,11 @@ export function ProductDetailPage() {
               setAdded(true)
             }}
           >
-            <label className="text-sm font-semibold" htmlFor={`qty-${product.slug}`}>
+            <label className="field field-inline" htmlFor={`qty-${product.slug}`}>
               Quantity
               <input
                 id={`qty-${product.slug}`}
-                className="mt-1 block w-24 border border-line bg-surface px-3 py-2"
+                className="qty-input"
                 inputMode="numeric"
                 value={quantity}
                 data-testid={`detail-qty-${product.slug}`}
@@ -121,41 +122,37 @@ export function ProductDetailPage() {
                 }}
               />
             </label>
-            <button
-              type="submit"
-              className="min-h-11 border border-ink bg-accent px-3 text-accent-contrast"
-              data-testid={`detail-add-${product.slug}`}
-            >
+            <button type="submit" className="btn" data-testid={`detail-add-${product.slug}`}>
               Add to cart
             </button>
           </form>
           {added ? (
-            <p role="status" className="mt-3 text-sm">
+            <p role="status" className="status-line">
               Added to cart. <Link to="/cart">View cart</Link>
             </p>
           ) : null}
-          <p className="mt-4 text-sm text-muted">
+          <p className="fine">
             Shown price text: {priceLabel(product)}. Availability in this sample: {availabilityLabel(product)}.
           </p>
         </div>
       </div>
-      <section className="mt-8 max-w-3xl">
-        <h2 className="text-xl font-semibold">Source notes</h2>
-        <p className="mt-2">
+      <section className="notes reveal">
+        <h2>Source notes</h2>
+        <p>
           These notes are what discovery captured on the source page. They are a record of that capture, and this
           sample does not re-check a live quote or live inventory.
         </p>
-        <p className="mt-2">Price observation: {product.priceObservation}</p>
-        <p className="mt-2">Availability observation: {product.availabilityObservation}</p>
-        <p className="mt-3 break-all">
+        <p>Price observation: {product.priceObservation}</p>
+        <p>Availability observation: {product.availabilityObservation}</p>
+        <p>
           <ExternalAnchor href={product.sourceUrl}>Source product page</ExternalAnchor>
         </p>
-        <ul className="mt-3 list-disc break-all pl-5 text-sm">
+        <ul>
           {product.images.map((item) => (
             <li key={item.sourceUrl}>{item.sourceUrl}</li>
           ))}
         </ul>
       </section>
-    </Page>
+    </div>
   )
 }

@@ -2,7 +2,7 @@ import { Link, useNavigate } from 'react-router-dom'
 import { getProduct, priceLabel } from '../data/catalog'
 import { buildTestReview, saveTestReview } from '../cart/testReview'
 import { useCart } from '../context/CartContext'
-import { Page, TestBanner } from '../components/Facts'
+import { Page, PageHeader, TestBanner } from '../components/Facts'
 
 export function CheckoutPage() {
   const { items } = useCart()
@@ -17,6 +17,7 @@ export function CheckoutPage() {
         partNumber: product.partNumber,
         quantity: item.quantity,
         priceLabel: priceLabel(product),
+        image: product.images[0]?.src,
       }
     })
     .filter(Boolean)
@@ -29,36 +30,39 @@ export function CheckoutPage() {
   }
 
   return (
-    <Page title="Test checkout | Leeps Supply Company">
-      <TestBanner />
-      <h1 className="mt-4 text-2xl font-semibold">Test checkout</h1>
-      <p className="mt-3 max-w-3xl">
-        Review the sample cart in this browser. Confirming writes a local test reference in this tab. It does not
-        contact a payment provider, send a notification, collect customer details, or place an order.
-      </p>
+    <Page title="Test checkout | Leeps Supply Company" banner={<TestBanner />}>
+      <PageHeader heading="Test checkout">
+        <p>
+          Review the sample cart in this browser. Confirming writes a local test reference in this tab. It does not
+          contact a payment provider, send a notification, collect customer details, or place an order.
+        </p>
+      </PageHeader>
       {lines.length === 0 ? (
-        <div className="mt-6">
+        <div className="empty-note">
           <p>Your cart is empty, so there is nothing to review.</p>
-          <p className="mt-3">
+          <p>
             <Link to="/products">Browse the sample products</Link>
           </p>
         </div>
       ) : (
-        <ul className="mt-6 flex flex-col gap-3">
+        <ul className="stack-list">
           {lines.map((line) => (
-            <li key={line.slug} className="border border-line bg-surface p-3" data-testid={`review-${line.slug}`}>
-              <p className="font-semibold">{line.name}</p>
-              <p className="text-sm">Part number {line.partNumber}</p>
-              <p>Quantity {line.quantity}</p>
-              <p>{line.priceLabel}</p>
+            <li key={line.slug} className="stack-card" data-testid={`review-${line.slug}`}>
+              {line.image ? <img src={line.image} alt="" /> : null}
+              <div>
+                <p className="price-line">{line.name}</p>
+                <p className="meta-line">Part number {line.partNumber}</p>
+                <p>Quantity {line.quantity}</p>
+                <p>{line.priceLabel}</p>
+              </div>
             </li>
           ))}
         </ul>
       )}
-      <p className="mt-4 text-sm">No total is shown. Observed prices were blank, still loading, or Call for Price.</p>
+      <p>No total is shown. Observed prices were blank, still loading, or Call for Price.</p>
       <button
         type="button"
-        className="mt-4 min-h-11 border border-ink bg-accent px-3 text-accent-contrast disabled:opacity-50"
+        className="btn"
         data-testid="confirm-test-review"
         disabled={lines.length === 0}
         onClick={confirmTestReview}

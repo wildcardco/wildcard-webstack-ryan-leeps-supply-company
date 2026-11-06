@@ -2,9 +2,24 @@ import { Link } from 'react-router-dom'
 import { business, categories, counterLocations, showroomLocations } from '../data/catalog'
 import { usePageTitle } from '../hooks/usePageTitle'
 
-export function Page({ title, children }) {
+export function Page({ title, banner, children }) {
   usePageTitle(title)
-  return <div className="mx-auto w-full max-w-page px-4 py-6">{children}</div>
+  return (
+    <>
+      {banner}
+      <div className="page-shell">{children}</div>
+    </>
+  )
+}
+
+export function PageHeader({ heading, children }) {
+  return (
+    <div className="page-intro reveal">
+      <h1>{heading}</h1>
+      <span className="draw-rule rule-red" />
+      {children}
+    </div>
+  )
 }
 
 export function ExternalAnchor({ href, children, className }) {
@@ -19,7 +34,7 @@ export function ExternalAnchor({ href, children, className }) {
 export function SourceNote({ url, children }) {
   if (!url) return null
   return (
-    <p className="mt-2 break-all text-sm text-muted">
+    <p className="source-note">
       {children || 'Source'}: <ExternalAnchor href={url}>{url}</ExternalAnchor>
     </p>
   )
@@ -27,7 +42,7 @@ export function SourceNote({ url, children }) {
 
 export function TestBanner() {
   return (
-    <p className="border border-line bg-notice px-3 py-2 font-semibold text-notice-ink" data-testid="test-banner">
+    <p className="test-stamp" data-testid="test-banner">
       TEST / NO PAYMENT / NO REAL ORDER
     </p>
   )
@@ -35,7 +50,7 @@ export function TestBanner() {
 
 export function PhoneList() {
   return (
-    <ul className="flex flex-col gap-1">
+    <ul className="phone-list">
       {business.phones.map((phone) => (
         <li key={phone.href}>
           <a href={phone.href}>{phone.display}</a>
@@ -47,24 +62,24 @@ export function PhoneList() {
 
 export function LocationLists() {
   return (
-    <div className="grid gap-6 sm:grid-cols-2">
+    <div className="loc-grid">
       <section>
-        <h2 className="text-lg font-semibold">Counters</h2>
-        <p className="mt-1 text-sm">
+        <h2>Counters</h2>
+        <p>
           <ExternalAnchor href="http://www.leepscounters.com/">COUNTERS</ExternalAnchor>
         </p>
-        <ul className="mt-2 list-disc pl-5">
+        <ul>
           {counterLocations.map((location) => (
             <li key={location}>{location}</li>
           ))}
         </ul>
       </section>
       <section>
-        <h2 className="text-lg font-semibold">Showrooms</h2>
-        <p className="mt-1 text-sm">
+        <h2>Showrooms</h2>
+        <p>
           <ExternalAnchor href="http://www.waterplaceshowrooms.com">SHOWROOMS</ExternalAnchor>
         </p>
-        <ul className="mt-2 list-disc pl-5">
+        <ul>
           {showroomLocations.map((location) => (
             <li key={location}>{location}</li>
           ))}
@@ -74,12 +89,15 @@ export function LocationLists() {
   )
 }
 
-export function CategoryLinkList() {
+export function CategoryLinkList({ className = 'cat-index' }) {
   return (
-    <ul className="flex flex-col gap-2">
+    <ul className={className}>
       {categories.map((category) => (
         <li key={category.slug}>
-          <Link to={category.path}>{category.heading}</Link>
+          <Link to={category.path}>
+            {category.heading}
+            <span aria-hidden="true">→</span>
+          </Link>
         </li>
       ))}
     </ul>
@@ -89,8 +107,8 @@ export function CategoryLinkList() {
 export function SiteLink({ item, className, onClick, children }) {
   const content = (
     <>
-      {children || item.label}
-      {item.hint ? <span className="sr-only"> {item.hint}</span> : null}
+      <span>{children || item.label}</span>
+      {item.hint ? <span className="nav-hint">{item.hint}</span> : null}
     </>
   )
   if (item.to) {

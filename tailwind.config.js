@@ -11,8 +11,12 @@ export default {
         line: 'var(--color-line)',
         accent: 'var(--color-accent)',
         'accent-contrast': 'var(--color-accent-contrast)',
+        steel: 'var(--color-steel)',
         notice: 'var(--color-notice-bg)',
         'notice-ink': 'var(--color-notice-ink)',
+      },
+      fontFamily: {
+        sans: ['Outfit', 'Century Gothic', 'Avenir Next', 'Trebuchet MS', 'Segoe UI', 'sans-serif'],
       },
       maxWidth: {
         page: 'var(--max-page)',
